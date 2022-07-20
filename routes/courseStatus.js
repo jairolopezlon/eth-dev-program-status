@@ -32,46 +32,59 @@ const courses = [
 ]
 
 const getCoursesCompleted = async (username) => {
-    const browser = await webkit.launch()
-    const page = await browser.newPage()
-    await page.goto(`https://platzi.com/p/${username}/`)
-    const courses = await page.locator('.Course-title')
-    const coursesTitles = await courses.allInnerTexts()
-    await browser.close()
-    return coursesTitles
+    try {
+        const browser = await webkit.launch()
+        const page = await browser.newPage()
+        await page.goto(`https://platzi.com/p/${username}/`)
+        const courses = await page.locator('.Course-title')
+        const coursesTitles = await courses.allInnerTexts()
+        await browser.close()
+        return coursesTitles
+    } catch (error) {
+        console.log(error)
+    }
 }
 
 const getCoursesMetrics = async ({ username, courses }) => {
-    const coursesCompleted = await getCoursesCompleted(username)
-    const coursesStatus = []
-    const coursesAccount = courses.length
-    let coursesCompletedAccount = 0;
-    for (let course of courses) {
-        let completed = false
-        if (coursesCompleted.includes(course)) {
-            coursesCompletedAccount++
-            completed = true
-        }
-        coursesStatus.push({
-            course,
-            completed
-        })
+    try {
 
+        const coursesCompleted = await getCoursesCompleted(username)
+        const coursesStatus = []
+        const coursesAccount = courses.length
+        let coursesCompletedAccount = 0;
+        for (let course of courses) {
+            let completed = false
+            if (coursesCompleted.includes(course)) {
+                coursesCompletedAccount++
+                completed = true
+            }
+            coursesStatus.push({
+                course,
+                completed
+            })
+
+        }
+        const coursesMetrics = {
+            percentComplete: (coursesCompletedAccount / coursesAccount).toFixed(2),
+            coursesCompleted: coursesCompletedAccount,
+            coursesTotal: coursesAccount,
+            coursesStatus
+        }
+        return coursesMetrics
+    } catch (error) {
+        console.log(error)
     }
-    const coursesMetrics = {
-        percentComplete: (coursesCompletedAccount / coursesAccount).toFixed(2),
-        coursesCompleted: coursesCompletedAccount,
-        coursesTotal: coursesAccount,
-        coursesStatus
-    }
-    return coursesMetrics
 }
 
 
 router.get("/course-status/:username", async (req, res, next) => {
-    const { username } = req.params
-    const coursesMetrics = await getCoursesMetrics({ username, courses })
-    return res.status(200).json(coursesMetrics);
+    try {
+        const { username } = req.params
+        const coursesMetrics = await getCoursesMetrics({ username, courses })
+        return res.status(200).json(coursesMetrics);
+    } catch (error) {
+        console.log(error)
+    }
 });
 
 module.exports = router;
