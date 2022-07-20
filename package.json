@@ -3,9 +3,6 @@
     "version": "1.0.0",
     "description": "web scraping to get percent of complete courses of ethereum developer program of platzi",
     "main": "index.js",
-    "engines": {
-        "node": "14.x"
-    },
     "scripts": {
         "start": "node index.js",
         "dev": "nodemon index.js"
